@@ -20,6 +20,12 @@ snapshot and sends at most one metadata command per changed pane. The CLI calls
 have timeouts. Frequent lifecycle events can still start many hooks; this is not
 a claim of zero overhead or a measured benchmark.
 
+In Herdr 0.9 multi-machine views, this flow runs independently on every server
+that hosts panes. Each server publishes tokens into its own snapshot. The Herdr
+client combines those endpoint snapshots and renders them with the viewing
+client's sidebar and terminal configuration. Plugin registration and runtime
+files do not propagate between machines.
+
 ## Grouping and titles
 
 Snapshot order follows Herdr's workspace/tab/pane order. The layout requires
@@ -93,9 +99,13 @@ Rebuild fonts with `.venv-font/bin/python tools/build_font.py`, then
 and matching `dist/` files. Tests compare rebuilt fonts byte for byte. Preserve
 the artwork provenance in [third-party notices](../assets/THIRD_PARTY_NOTICES.md).
 
-Live verification uses Herdr 0.8.2 and Ghostty 1.3.1 on Linux. The README capture
-comes from an isolated session with four demonstration agent reports. Installation,
-repeat installation, doctor, font rendering, and restoration of the original
-files were exercised there. Unit tests also cover single/multiple-tab transitions,
-unchanged metadata, unrelated settings, and refusal to overwrite later edits.
-macOS terminal rendering remains unverified.
+Live rendering verification uses Herdr 0.8.2 and Ghostty 1.3.1 on Linux. The
+README capture comes from an isolated session with four demonstration agent
+reports. Installation, repeat installation, doctor, font rendering, and
+restoration of the original files were exercised there. The released Herdr
+0.9.0 macOS binary also accepts the layout, manifest, actions, and event
+subscriptions; its session snapshot retains the fields used by the plugin, and
+an isolated `refresh` action exits successfully. Unit tests cover
+single/multiple-tab transitions, unchanged metadata, unrelated settings, and
+refusal to overwrite later edits. macOS terminal rendering and a live
+multi-machine sidebar remain unverified.
