@@ -5,8 +5,11 @@ configuration, an icon font, and a companion plugin. The plugin publishes displa
 metadata to group existing agents. It does not launch agents, generate summaries,
 or implement Herdr's renderer.
 
-The repository is `testy-cool/herdr-sidebar-config`. The installed plugin ID stays
-`testy-cool.herdr-sidebar` so existing configurations and metadata remain valid.
+The repository is `iancleary/herdr-sidebar-config`. The installed plugin ID is
+`iancleary.herdr-sidebar`.
+
+Run `uv sync` after cloning. The resulting `.venv/bin/python` is the only
+runtime interpreter for the plugin and its tests.
 
 ## Install for a user
 
@@ -14,9 +17,9 @@ Work within the user's requested scope. Run these from this checkout inside the
 target Herdr session; `HERDR_ENV` must be `1`.
 
 ```sh
-python3 setup_sidebar.py install --dry-run --json
-python3 setup_sidebar.py install --json
-python3 setup_sidebar.py doctor --json
+.venv/bin/python setup_sidebar.py install --dry-run --json
+.venv/bin/python setup_sidebar.py install --json
+.venv/bin/python setup_sidebar.py doctor --json
 ```
 
 For terminals other than Ghostty, add `--text` to both install commands. Setup
@@ -29,7 +32,7 @@ configuration and hook, but cannot see which fonts a terminal process loaded.
 If fonts were just installed, explain that a fresh Ghostty process is needed;
 do not kill Ghostty or restart a live Herdr server on the user's behalf.
 
-Removal: `python3 setup_sidebar.py uninstall --dry-run --json`, then the same
+Removal: `.venv/bin/python setup_sidebar.py uninstall --dry-run --json`, then the same
 command without `--dry-run`. If files changed after setup, preserve those edits
 and follow [manual removal](docs/setup.md#manual-removal).
 
@@ -47,11 +50,12 @@ and follow [manual removal](docs/setup.md#manual-removal).
 
 ## Preserve these contracts
 
-- Keep runtime dependency-free on Python 3.11+. `fontTools` is build/test only.
+- Keep runtime dependency-free on the UV-managed Python 3.12. `fontTools` is
+  build/test only.
 - Use native snapshot facts for agent identity and status. Never send prompts,
   keystrokes, stop commands, or synthetic agent states from the plugin runtime.
-- Publish only changed `hs_*` display tokens under `plugin:testy-cool.herdr-sidebar`.
-  Preserve the optional user-owned `hs_title` override and other plugins' tokens.
+- Publish only changed `ihs_*` display tokens under `plugin:iancleary.herdr-sidebar`.
+  Preserve the optional user-owned `ihs_title` override and other plugins' tokens.
 - Keep refresh event-driven. No polling, animation timer, or `pane.updated` hook:
   metadata events can otherwise trigger repeated refreshes and UI repainting.
 - Keep one workspace heading, and one heading per tab containing agents. Hide
@@ -67,7 +71,7 @@ and follow [manual removal](docs/setup.md#manual-removal).
 ## Verify changes
 
 ```sh
-python3 -m unittest discover -s tests -v
+.venv/bin/python -m unittest discover -s tests -v
 python3 -m venv .venv-font
 .venv-font/bin/pip install -r requirements-font.txt
 .venv-font/bin/python -m unittest discover -s tests -v

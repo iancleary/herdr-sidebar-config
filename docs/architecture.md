@@ -32,7 +32,7 @@ The outer workspace-to-tab connection has no branch. Under each tab, agents use
 `├─` and `└─`. A workspace with one tab has neither tab headings nor branches.
 The tree is presentational, with native Herdr row selection and navigation.
 
-Titles prefer a user `hs_title` token. For a working Codex or Claude pane with a
+Titles prefer a user `ihs_title` token. For a working Codex or Claude pane with a
 native session ID, the plugin scans at most the final 512 KiB of that provider's
 local history and selects its latest meaningful user instruction. Malformed
 records, injected instruction headers, screenshot markers, and vague follow-ups
@@ -42,16 +42,16 @@ analysis or a model call.
 
 ## Token contract
 
-Publisher: `plugin:testy-cool.herdr-sidebar`.
+Publisher: `plugin:iancleary.herdr-sidebar`.
 
 | Token | Meaning |
 | --- | --- |
-| `hs_group` | Workspace heading on its first agent |
-| `hs_tab` | Tab heading on its first agent, when multiple tabs exist |
-| `hs_logo` | Indentation, optional branch, and provider icon/text |
-| `hs_working`, `hs_blocked`, `hs_done`, `hs_idle`, `hs_unknown` | Exactly one populated with the native status symbol and task label |
-| `hs_gap` | Blank row after the last agent before another workspace |
-| `hs_title` | Optional user-owned title override; read but never written or cleared by this plugin |
+| `ihs_group` | Workspace heading on its first agent |
+| `ihs_tab` | Tab heading on its first agent, when multiple tabs exist |
+| `ihs_logo` | Indentation, optional branch, and provider icon/text |
+| `ihs_working`, `ihs_blocked`, `ihs_done`, `ihs_idle`, `ihs_unknown` | Exactly one populated with the native status symbol and task label |
+| `ihs_gap` | Blank row after the last agent before another workspace |
+| `ihs_title` | Optional user-owned title override; read but never written or cleared by this plugin |
 
 Absent generated values are cleared, including when a pane stops being an
 agent. Native identity/state and other plugins' metadata are not overwritten.
@@ -79,7 +79,7 @@ space in Ghostty, which makes their size readable without shrinking the text.
 
 ## Development
 
-Run `python3 -m unittest discover -s tests -v` for dependency-free checks. Font
+Run `.venv/bin/python -m unittest discover -s tests -v` for dependency-free checks. Font
 tests skip when the optional build dependency is unavailable. For all checks:
 
 ```sh

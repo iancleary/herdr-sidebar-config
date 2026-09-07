@@ -28,9 +28,9 @@ class RuntimeTests(unittest.TestCase):
 
     def test_title_override_is_read_but_never_owned(self):
         pane = {"pane_id": "w1:p1", "workspace_id": "w1", "agent": "codex",
-                "tokens": {"hs_title": "User title", "other_plugin": "keep"}}
+                "tokens": {"ihs_title": "User title", "other_plugin": "keep"}}
         self.assertEqual(task_label(pane, {}), "User title")
         values = desired_rows([pane], [{"workspace_id": "w1", "label": "project"}], {}, "text")["w1:p1"]
-        self.assertNotIn("hs_title", values)
+        self.assertNotIn("ihs_title", values)
         self.assertNotIn("other_plugin", values)
-        self.assertTrue(all(key.startswith("hs_") for key in values))
+        self.assertTrue(all(key.startswith("ihs_") for key in values))

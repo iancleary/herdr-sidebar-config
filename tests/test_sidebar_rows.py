@@ -58,18 +58,18 @@ class SidebarRowsTests(unittest.TestCase):
         ]
         rows = desired_rows(panes, [{"workspace_id": "w1", "label": "one"},
                                     {"workspace_id": "w2", "label": "two"}], {})
-        self.assertIsNone(rows["w1:p1"]["hs_gap"])
-        self.assertIsNone(rows["w1:p2"]["hs_group"])
-        self.assertIsNotNone(rows["w1:p2"]["hs_gap"])
-        self.assertIsNone(rows["w2:p1"]["hs_gap"])
-        self.assertTrue(rows["w1:p1"]["hs_working"].startswith("◔ "))
-        self.assertTrue(rows["w1:p2"]["hs_blocked"].startswith("? "))
-        self.assertTrue(rows["w2:p1"]["hs_done"].startswith("✓ "))
-        self.assertIsNone(rows["w2:p1"]["hs_working"])
+        self.assertIsNone(rows["w1:p1"]["ihs_gap"])
+        self.assertIsNone(rows["w1:p2"]["ihs_group"])
+        self.assertIsNotNone(rows["w1:p2"]["ihs_gap"])
+        self.assertIsNone(rows["w2:p1"]["ihs_gap"])
+        self.assertTrue(rows["w1:p1"]["ihs_working"].startswith("◔ "))
+        self.assertTrue(rows["w1:p2"]["ihs_blocked"].startswith("? "))
+        self.assertTrue(rows["w2:p1"]["ihs_done"].startswith("✓ "))
+        self.assertIsNone(rows["w2:p1"]["ihs_working"])
 
     def test_unchanged_rows_do_not_publish_again(self):
-        desired = {"hs_group": "project", "hs_working": "⠿ Review", "hs_done": None}
-        existing = {"hs_group": "project", "hs_working": "⠿ Review"}
+        desired = {"ihs_group": "project", "ihs_working": "⠿ Review", "ihs_done": None}
+        existing = {"ihs_group": "project", "ihs_working": "⠿ Review"}
         self.assertEqual(changed_tokens(existing, desired), {})
 
     def test_tab_groups_use_compact_tree_guides(self):
@@ -80,21 +80,21 @@ class SidebarRowsTests(unittest.TestCase):
         ]
         workspaces = [{"workspace_id": "w1", "label": "project"}]
         rows = desired_rows(panes, workspaces, {"w1:t1": "main", "w1:t2": "docs"})
-        self.assertEqual(rows["w1:p1"]["hs_tab"], "main")
-        self.assertIsNone(rows["w1:p2"]["hs_tab"])
-        self.assertEqual(rows["w1:p3"]["hs_tab"], "\u2800\u2800docs")
-        self.assertEqual(rows["w1:p1"]["hs_logo"], "├─ \ue1a1")
-        self.assertEqual(rows["w1:p2"]["hs_logo"], "\u2800\u2800└─ \ue1a0")
-        self.assertEqual(rows["w1:p3"]["hs_logo"], "└─ \ue1a1")
+        self.assertEqual(rows["w1:p1"]["ihs_tab"], "main")
+        self.assertIsNone(rows["w1:p2"]["ihs_tab"])
+        self.assertEqual(rows["w1:p3"]["ihs_tab"], "\u2800\u2800docs")
+        self.assertEqual(rows["w1:p1"]["ihs_logo"], "├─ \ue1a1")
+        self.assertEqual(rows["w1:p2"]["ihs_logo"], "\u2800\u2800└─ \ue1a0")
+        self.assertEqual(rows["w1:p3"]["ihs_logo"], "└─ \ue1a1")
 
         # A close/move clears the former heading and updates the remaining branch.
         panes[0].pop("agent")
         panes[2]["tab_id"] = "w1:t1"
         rows = desired_rows(panes, workspaces, {"w1:t1": "renamed"})
-        self.assertIsNone(rows["w1:p1"]["hs_tab"])
-        self.assertEqual(rows["w1:p2"]["hs_group"], "project")
-        self.assertIsNone(rows["w1:p2"]["hs_tab"])
-        self.assertIsNone(rows["w1:p3"]["hs_tab"])
+        self.assertIsNone(rows["w1:p1"]["ihs_tab"])
+        self.assertEqual(rows["w1:p2"]["ihs_group"], "project")
+        self.assertIsNone(rows["w1:p2"]["ihs_tab"])
+        self.assertIsNone(rows["w1:p3"]["ihs_tab"])
 
     def test_single_tab_uses_compact_rows_until_a_second_tab_exists(self):
         panes = [
@@ -104,13 +104,13 @@ class SidebarRowsTests(unittest.TestCase):
         workspaces = [{"workspace_id": "w1", "label": "project"}]
         tabs = {"w1:t1": "named-tab", "w1:t2": "shell"}
         compact = desired_rows(panes, workspaces, tabs)
-        self.assertTrue(all(row["hs_tab"] is None for row in compact.values()))
-        self.assertEqual(compact["w1:p1"]["hs_logo"], "\ue1a1")
-        self.assertEqual(compact["w1:p2"]["hs_logo"], "\u2800\u2800\ue1a0")
+        self.assertTrue(all(row["ihs_tab"] is None for row in compact.values()))
+        self.assertEqual(compact["w1:p1"]["ihs_logo"], "\ue1a1")
+        self.assertEqual(compact["w1:p2"]["ihs_logo"], "\u2800\u2800\ue1a0")
 
         # Count real tabs, including shell-only tabs, so tab identity stays useful.
         panes.append({"pane_id": "w1:p3", "workspace_id": "w1", "tab_id": "w1:t2"})
         expanded = desired_rows(panes, workspaces, tabs)
-        self.assertEqual(expanded["w1:p1"]["hs_tab"], "named-tab")
-        self.assertIsNone(expanded["w1:p3"]["hs_tab"])
+        self.assertEqual(expanded["w1:p1"]["ihs_tab"], "named-tab")
+        self.assertIsNone(expanded["w1:p3"]["ihs_tab"])
         self.assertEqual(desired_rows(panes[:-1], workspaces, tabs), compact)

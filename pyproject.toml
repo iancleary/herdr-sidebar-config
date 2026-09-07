@@ -1,0 +1,8 @@
+[project]
+name = "herdr-sidebar-config"
+version = "0.1.0"
+description = "Workspace, tab, and agent sidebar plugin for Herdr."
+requires-python = ">=3.11,<3.13"
+
+[tool.uv]
+package = false

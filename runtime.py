@@ -8,7 +8,7 @@ import subprocess
 import tomllib
 from pathlib import Path
 
-PLUGIN_ID = "testy-cool.herdr-sidebar"
+PLUGIN_ID = "iancleary.herdr-sidebar"
 FONT_FAMILY = "Herdr Sidebar Logos"
 PUA_LOGOS = {name: chr(0xE1A0 + index) for index, name in enumerate(
     ("claude", "codex", "opencode", "omp", "cline", "mastracode", "kimi", "kilo", "maki")

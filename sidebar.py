@@ -74,8 +74,8 @@ def latest_history_task(pane):
 
 def task_label(pane, tabs):
     tokens = pane.get("tokens") or {}
-    if tokens.get("hs_title"):
-        return tokens["hs_title"]
+    if tokens.get("ihs_title"):
+        return tokens["ihs_title"]
     if pane.get("agent_status") == "working":
         task = latest_history_task(pane)
         if task:
@@ -129,12 +129,12 @@ def desired_rows(panes, workspaces, tabs, icons="font"):
     result = {}
     for pane in panes:
         heading = headers[pane["pane_id"]]
-        values = {"hs_group": heading, "hs_tab": None,
-                  "hs_gap": None, "hs_logo": None}
-        values.update({f"hs_{state}": None for state in STATES})
+        values = {"ihs_group": heading, "ihs_tab": None,
+                  "ihs_gap": None, "ihs_logo": None}
+        values.update({f"ihs_{state}": None for state in STATES})
         if pane.get("agent"):
             if heading and previous is not None:
-                result[previous]["hs_gap"] = BLANK
+                result[previous]["ihs_gap"] = BLANK
             tab_id = pane.get("tab_id")
             workspace_tabs = groups[pane["workspace_id"]]
             show_tree = len(tab_ids[pane["workspace_id"]]) > 1
@@ -144,18 +144,18 @@ def desired_rows(panes, workspaces, tabs, icons="font"):
             if show_tree and first_in_tab:
                 tab_label = tabs.get(tab_id) or "tab"
                 # Continuation rows start two cells to the right of first rows.
-                values["hs_tab"] = ("" if heading else BLANK * 2) + tab_label
+                values["ihs_tab"] = ("" if heading else BLANK * 2) + tab_label
             logo = logo_for(pane["agent"], icons)
             if show_tree:
                 prefix = "" if first_in_tab else BLANK * 2
                 prefix += "└─ " if last_in_tab else "├─ "
             else:
                 prefix = "" if heading else BLANK * 2
-            values["hs_logo"] = prefix + logo
+            values["ihs_logo"] = prefix + logo
             status = pane.get("agent_status", "unknown")
             if status not in STATES:
                 status = "unknown"
-            values[f"hs_{status}"] = STATES[status] + " " + task_label(pane, tabs)
+            values[f"ihs_{status}"] = STATES[status] + " " + task_label(pane, tabs)
             previous = pane["pane_id"]
         result[pane["pane_id"]] = values
     return result

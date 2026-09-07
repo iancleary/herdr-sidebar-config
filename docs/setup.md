@@ -1,19 +1,20 @@
 # Setup and troubleshooting
 
 Use the [README quick start](../README.md#install) for the supported installation
-flow. Run setup from the same checkout and Herdr session each time.
+flow. Run `uv sync` in the checkout first. Run setup from the same checkout and
+Herdr session each time.
 
 ## Files setup manages
 
 | Item | Default location |
 | --- | --- |
 | Herdr layout | `$XDG_CONFIG_HOME/herdr/config.toml`, or `~/.config/herdr/config.toml` |
-| Plugin icon setting | The directory printed by `herdr plugin config-dir testy-cool.herdr-sidebar`, then `config.toml` |
+| Plugin icon setting | The directory printed by `herdr plugin config-dir iancleary.herdr-sidebar`, then `config.toml` |
 | Linux font | `~/.local/share/fonts/HerdrSidebarLogos-Regular.ttf` |
 | macOS font | `~/Library/Fonts/HerdrSidebarLogos-Regular.ttf` |
 | Linux Ghostty config | `$XDG_CONFIG_HOME/ghostty/config`, or `~/.config/ghostty/config` |
 | macOS Ghostty config | `~/Library/Application Support/com.mitchellh.ghostty/config` |
-| Backups | `herdr-sidebar-setup/install.json` beside the Herdr config |
+| Backups | `iancleary-herdr-sidebar-setup/install.json` beside the Herdr config |
 
 `HERDR_CONFIG_PATH` selects a non-default Herdr config. It must be the config of
 the running session. `--config` may name that same path, but cannot retarget an
@@ -44,12 +45,12 @@ or keeping later changes to files tracked by setup.
    replacing existing `[ui.sidebar.agents]` tables. Set
    `agent_panel_sort = "spaces"` in the existing `[ui]` table. Do not create a
    duplicate `[ui]` table.
-4. Run `herdr plugin config-dir testy-cool.herdr-sidebar`. In that directory's
+4. Run `herdr plugin config-dir iancleary.herdr-sidebar`. In that directory's
    `config.toml`, set `icons = "text"` for portable labels, or `icons = "font"`
    after completing the font steps below.
 5. Run `herdr config check`, then `herdr server reload-config`.
-6. Run `herdr plugin enable testy-cool.herdr-sidebar`, then
-   `herdr plugin action invoke refresh --plugin testy-cool.herdr-sidebar`.
+6. Run `herdr plugin enable iancleary.herdr-sidebar`, then
+   `herdr plugin action invoke refresh --plugin iancleary.herdr-sidebar`.
 
 For font mode, copy `dist/HerdrSidebarLogos-Regular.ttf` to your platform's font
 directory in the table above. On Linux, run `fc-cache -f` afterward. Add this to
@@ -68,8 +69,8 @@ codepoint mapping configuration; use text mode if unsure.
 
 Use this if setup has no backup or refuses to replace a file edited later.
 
-1. Run `herdr plugin action invoke clear --plugin testy-cool.herdr-sidebar` while
-   the plugin is enabled, then `herdr plugin disable testy-cool.herdr-sidebar`.
+1. Run `herdr plugin action invoke clear --plugin iancleary.herdr-sidebar` while
+   the plugin is enabled, then `herdr plugin disable iancleary.herdr-sidebar`.
 2. Restore only the old `[ui.sidebar.agents]` tables and `agent_panel_sort` from
    your backup, preserving newer unrelated settings. If you had no custom
    sidebar before installation, remove those tables and the sort override to
@@ -95,7 +96,7 @@ keeps removal from deleting a user's checkout.
 | Rows are blank | Run doctor, check the plugin is enabled, and invoke refresh. The custom layout needs the plugin's metadata. |
 | A task label is stale | Focus the pane or invoke refresh. Titles update on lifecycle/focus events, not on each byte of terminal output. |
 | Tabs look flat | A workspace with one tab deliberately hides tab headings. Add a second tab to see the tree. |
-| Doctor reports a failed hook | Inspect `herdr plugin log list --plugin testy-cool.herdr-sidebar --limit 5`. Confirm `python3` is version 3.11 or later in the hook's PATH. |
+| Doctor reports a failed hook | Inspect `herdr plugin log list --plugin iancleary.herdr-sidebar --limit 5`. Confirm that `uv sync` created `.venv/bin/python`. |
 
 Doctor checks plugin registration, layout, sorting, the latest hook result, and
 font files/mapping in explicit font mode. It cannot inspect Ghostty's in-memory

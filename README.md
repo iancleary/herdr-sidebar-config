@@ -14,25 +14,29 @@ demonstration data in a separate session; the plugin and renderer are real.*
 
 ## Install
 
-Requires **Herdr 0.8.2 or later**, **Python 3.11+**, and Git. The icon setup targets
+Requires **Herdr 0.8.2 or later**, [uv](https://docs.astral.sh/uv/), and Git. uv provisions the required Python 3.12 runtime. The icon setup targets
 Ghostty on Linux or macOS. Linux/Ghostty has been tested live; macOS paths are
 provided but have not been tested in a live terminal.
 
 Run inside a Herdr terminal pane:
 
 ```sh
-git clone https://github.com/testy-cool/herdr-sidebar-config.git
-cd herdr-sidebar-config
-python3 setup_sidebar.py install
-python3 setup_sidebar.py doctor
+git clone git@github.com:iancleary/herdr-sidebar-config.git ~/Code/herdr-sidebar-config
+cd ~/Code/herdr-sidebar-config
+uv sync
+.venv/bin/python setup_sidebar.py install
+.venv/bin/python setup_sidebar.py doctor
 ```
+
+`uv sync` installs the pinned Python runtime in `.venv`. Herdr hooks call that
+interpreter directly, rather than the macOS system Python.
 
 Open a **fresh Ghostty process** to load the newly installed font. Your Herdr
 session keeps running; attach to it from that process. A new tab in an existing
 Ghostty process may still use its old font cache.
 
-Want to inspect the changes first? Run `python3 setup_sidebar.py install --dry-run`.
-For another terminal, run `python3 setup_sidebar.py install --text` to use short
+Want to inspect the changes first? Run `.venv/bin/python setup_sidebar.py install --dry-run`.
+For another terminal, run `.venv/bin/python setup_sidebar.py install --text` to use short
 provider labels such as `AI` and `C`, with no font or Ghostty changes.
 
 Setup links this checkout as a plugin, replaces the agent sidebar layout, sets
@@ -64,7 +68,7 @@ Normal lifecycle events refresh the sidebar automatically. After manually
 changing a title override or icon setting:
 
 ```sh
-herdr plugin action invoke refresh --plugin testy-cool.herdr-sidebar
+herdr plugin action invoke refresh --plugin iancleary.herdr-sidebar
 ```
 
 To update, run `git pull --ff-only` in this checkout, then repeat the install and
@@ -74,8 +78,8 @@ use the [manual steps](docs/setup.md) when keeping later customizations.
 To restore the files saved during setup:
 
 ```sh
-python3 setup_sidebar.py uninstall --dry-run
-python3 setup_sidebar.py uninstall
+.venv/bin/python setup_sidebar.py uninstall --dry-run
+.venv/bin/python setup_sidebar.py uninstall
 ```
 
 Removal clears generated tokens, disables the plugin, and restores its backups.

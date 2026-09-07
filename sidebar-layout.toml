@@ -2,43 +2,43 @@
 [ui.sidebar.agents]
 row_gap = 0
 rows = [
-  [{ token = "$hs_group", bold = true, dim = false, fg = "#A8ADB9" }],
-  [{ token = "$hs_tab", fg = "#A8ADB9", dim = false }],
+  [{ token = "$ihs_group", bold = true, dim = false, fg = "#A8ADB9" }],
+  [{ token = "$ihs_tab", fg = "#A8ADB9", dim = false }],
   [
-    { token = "$hs_logo", fg = "#A8ADB9", dim = false },
-    { token = "$hs_working", fg = "#A8ADB9", dim = false },
-    { token = "$hs_blocked", fg = "#F08080", dim = false },
-    { token = "$hs_done", fg = "#91C788", dim = false },
-    { token = "$hs_idle", fg = "#A8ADB9", dim = false },
-    { token = "$hs_unknown", fg = "#A8ADB9", dim = false },
+    { token = "$ihs_logo", fg = "#A8ADB9", dim = false },
+    { token = "$ihs_working", fg = "#A8ADB9", dim = false },
+    { token = "$ihs_blocked", fg = "#F08080", dim = false },
+    { token = "$ihs_done", fg = "#91C788", dim = false },
+    { token = "$ihs_idle", fg = "#A8ADB9", dim = false },
+    { token = "$ihs_unknown", fg = "#A8ADB9", dim = false },
   ],
-  [{ token = "$hs_gap" }],
+  [{ token = "$ihs_gap" }],
 ]
 
 [ui.sidebar.agents.rows_by_agent]
 claude = [
-  [{ token = "$hs_group", bold = true, dim = false, fg = "#A8ADB9" }],
-  [{ token = "$hs_tab", fg = "#A8ADB9", dim = false }],
+  [{ token = "$ihs_group", bold = true, dim = false, fg = "#A8ADB9" }],
+  [{ token = "$ihs_tab", fg = "#A8ADB9", dim = false }],
   [
-    { token = "$hs_logo", fg = "#E68A67", dim = false },
-    { token = "$hs_working", fg = "#E68A67", dim = false },
-    { token = "$hs_blocked", fg = "#F08080", dim = false },
-    { token = "$hs_done", fg = "#91C788", dim = false },
-    { token = "$hs_idle", fg = "#A8ADB9", dim = false },
-    { token = "$hs_unknown", fg = "#A8ADB9", dim = false },
+    { token = "$ihs_logo", fg = "#E68A67", dim = false },
+    { token = "$ihs_working", fg = "#E68A67", dim = false },
+    { token = "$ihs_blocked", fg = "#F08080", dim = false },
+    { token = "$ihs_done", fg = "#91C788", dim = false },
+    { token = "$ihs_idle", fg = "#A8ADB9", dim = false },
+    { token = "$ihs_unknown", fg = "#A8ADB9", dim = false },
   ],
-  [{ token = "$hs_gap" }],
+  [{ token = "$ihs_gap" }],
 ]
 codex = [
-  [{ token = "$hs_group", bold = true, dim = false, fg = "#A8ADB9" }],
-  [{ token = "$hs_tab", fg = "#A8ADB9", dim = false }],
+  [{ token = "$ihs_group", bold = true, dim = false, fg = "#A8ADB9" }],
+  [{ token = "$ihs_tab", fg = "#A8ADB9", dim = false }],
   [
-    { token = "$hs_logo", fg = "#A78BFA", dim = false },
-    { token = "$hs_working", fg = "#A78BFA", dim = false },
-    { token = "$hs_blocked", fg = "#F08080", dim = false },
-    { token = "$hs_done", fg = "#91C788", dim = false },
-    { token = "$hs_idle", fg = "#A8ADB9", dim = false },
-    { token = "$hs_unknown", fg = "#A8ADB9", dim = false },
+    { token = "$ihs_logo", fg = "#A78BFA", dim = false },
+    { token = "$ihs_working", fg = "#A78BFA", dim = false },
+    { token = "$ihs_blocked", fg = "#F08080", dim = false },
+    { token = "$ihs_done", fg = "#91C788", dim = false },
+    { token = "$ihs_idle", fg = "#A8ADB9", dim = false },
+    { token = "$ihs_unknown", fg = "#A8ADB9", dim = false },
   ],
-  [{ token = "$hs_gap" }],
+  [{ token = "$ihs_gap" }],
 ]

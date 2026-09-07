@@ -217,7 +217,7 @@ def main():
     args.config = args.config.expanduser().resolve()
     args.ghostty_config = args.ghostty_config.expanduser().resolve()
     args.font_dir = args.font_dir.expanduser().resolve()
-    args.state_dir = (args.state_dir or args.config.parent / "herdr-sidebar-setup").expanduser().resolve()
+    args.state_dir = (args.state_dir or args.config.parent / "iancleary-herdr-sidebar-setup").expanduser().resolve()
     try:
         if os.environ.get("HERDR_ENV") != "1":
             raise RuntimeError("Run setup inside a Herdr session (HERDR_ENV=1).")
