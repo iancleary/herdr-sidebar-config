@@ -27,6 +27,22 @@ backs up modified files before writing. `--dry-run` reports paths and makes no
 writes. JSON output has a `status` field; exit 0 means success, 1 means a setup
 error or a doctor check needing attention, and 2 means invalid CLI arguments.
 
+Before automatic installation, check whether a configuration manager owns the
+Herdr or terminal config. Do not run the installer against generated files,
+managed symlinks, or read-only store paths. Update the manager's source and
+follow [managed-configuration integration](docs/setup.md#managed-configuration-integration)
+instead. Keep the repository path, Python environment, plugin link, sidebar
+layout, icon setting, font or text mode, terminal mapping, activation, and
+verification in scope; one configured component does not imply the others are
+installed.
+
+For a Herdr 0.9 multi-machine setup, install and enable the plugin runtime on
+every machine that hosts agent panes. Apply the sidebar layout, font, and
+terminal mapping on every client computer that renders the sidebar. Plugin
+registries do not synchronize between machines. Set the icon mode explicitly
+on remote hosts because automatic font detection runs on the plugin host, not
+the viewing client.
+
 Inspect the rendered sidebar before claiming success. Doctor verifies the
 configuration and hook, but cannot see which fonts a terminal process loaded.
 If fonts were just installed, explain that a fresh Ghostty process is needed;

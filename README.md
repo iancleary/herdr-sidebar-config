@@ -14,9 +14,11 @@ demonstration data in a separate session; the plugin and renderer are real.*
 
 ## Install
 
-Requires **Herdr 0.8.2 or later**, [uv](https://docs.astral.sh/uv/), and Git. uv provisions the required Python 3.12 runtime. The icon setup targets
-Ghostty on Linux or macOS. Linux/Ghostty has been tested live; macOS paths are
-provided but have not been tested in a live terminal.
+Requires **Herdr 0.8.2 or later**, [uv](https://docs.astral.sh/uv/), and Git. uv
+provisions the required Python 3.12 runtime. Compatibility with Herdr 0.9.0 has
+been verified with its released macOS binary. The icon setup targets Ghostty on
+Linux or macOS. Linux/Ghostty has been tested live; macOS paths are provided but
+have not been tested in a live terminal.
 
 Run inside a Herdr terminal pane:
 
@@ -27,6 +29,13 @@ uv sync
 .venv/bin/python setup_sidebar.py install
 .venv/bin/python setup_sidebar.py doctor
 ```
+
+This automatic path requires writable Herdr and terminal configuration files.
+If a configuration manager owns either file, do not run the installer against
+its generated files or symlinks. Add the sidebar settings, icon font, and
+terminal mapping to the manager's source instead, then link and enable the
+plugin. Follow the complete [managed-configuration integration](docs/setup.md#managed-configuration-integration)
+checklist.
 
 `uv sync` installs the pinned Python runtime in `.venv`. Herdr hooks call that
 interpreter directly, rather than the macOS system Python.
@@ -43,6 +52,13 @@ Setup links this checkout as a plugin, replaces the agent sidebar layout, sets
 workspace sorting, and backs up modified files. It preserves other Herdr
 settings. Keep the checkout where you installed it. See [setup details](docs/setup.md)
 for custom paths, manual installation, and troubleshooting.
+
+Herdr 0.9 can combine agents from local and saved SSH machines in one sidebar.
+Install and enable this plugin on every machine that hosts those agent panes so
+each server can publish its display tokens. Install the layout, font, and
+terminal mapping on every computer that displays the Herdr client. See
+[multi-machine setup](docs/setup.md#herdr-09-multi-machine-setup) for the split
+between agent hosts and viewing clients.
 
 ## What changes
 
