@@ -104,3 +104,16 @@ Read [architecture](docs/architecture.md) for the token contract and
 CLI help before changing commands; upstream documentation may describe a newer
 release. Make small commits after relevant verification. Report what actually
 ran, including any platform or live verification gaps.
+
+## Releases
+
+This repository uses SemVer. Keep the versions in `pyproject.toml`,
+`herdr-plugin.toml`, and `uv.lock` equal. Prepare version changes in a normal
+pull request before release execution.
+
+Use `create-release-process` to maintain the workflow. Use `release-runner` and
+the checked-in `release.toml` plus `scripts/release.py` for an ordinary release;
+do not reconstruct tag, push, or GitHub release commands. Read
+[docs/release.md](docs/release.md), then run check, plan, and guarded dry-run.
+Run apply only after an explicit publication request. Keep the shared runner
+unchanged and keep its source commit and checksum aligned in `release.toml`.
