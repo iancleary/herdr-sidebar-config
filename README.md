@@ -1,0 +1,103 @@
+# Herdr Sidebar
+
+**See what each agent is doing, grouped by workspace and tab.**
+
+A small [Herdr](https://herdr.dev) plugin with readable task labels, provider
+icons, and a compact tree that appears only when a workspace has multiple tabs.
+No Herdr fork or font build required.
+
+![Herdr Sidebar showing two tabs under herdr-sidebar and a compact icon-font workspace](docs/sidebar.png)
+
+*Actual Herdr 0.8.2 rendering in Ghostty 1.3.1. Agent names, tasks, and states are
+demonstration data in a separate session; the plugin and renderer are real.*
+
+## Install
+
+Requires **Herdr 0.8.2 or later**, **Python 3.11+**, and Git. The icon setup targets
+Ghostty on Linux or macOS. Linux/Ghostty has been tested live; macOS paths are
+provided but have not been tested in a live terminal.
+
+Run inside a Herdr terminal pane:
+
+```sh
+git clone https://github.com/testy-cool/herdr-sidebar.git
+cd herdr-sidebar
+python3 setup_sidebar.py install
+python3 setup_sidebar.py doctor
+```
+
+Open a **fresh Ghostty process** to load the newly installed font. Your Herdr
+session keeps running; attach to it from that process. A new tab in an existing
+Ghostty process may still use its old font cache.
+
+Want to inspect the changes first? Run `python3 setup_sidebar.py install --dry-run`.
+For another terminal, run `python3 setup_sidebar.py install --text` to use short
+provider labels such as `AI` and `C`, with no font or Ghostty changes.
+
+Setup links this checkout as a plugin, replaces the agent sidebar layout, sets
+workspace sorting, and backs up modified files. It preserves other Herdr
+settings. Keep the checkout where you installed it. See [setup details](docs/setup.md)
+for custom paths, manual installation, and troubleshooting.
+
+## What changes
+
+- **One tab:** agents sit directly beneath their workspace name.
+- **Multiple tabs:** each tab with agents gets a plain heading, with agent
+  branches below it. Shell-only tabs count toward the rule but add no empty rows.
+- **Readable labels:** existing terminal titles are cleaned up, with tab and
+  agent names as fallbacks. No model call or generated summary is involved.
+- **Native state:** `◔` working, `?` blocked, `✓` completed, `○` idle, `·` unknown.
+  These are static symbols, not animated loaders.
+- **Provider icons:** Claude, Codex, OpenCode, OMP, Cline, Mastra Code, Kimi,
+  Kilo, and Maki. Other agents get a diamond fallback.
+
+The tree is a visual grouping; it does not add collapsible folders. Agent clicks
+and keyboard navigation remain Herdr's native behavior. Long labels are clipped
+to the sidebar width. The plugin cannot recover text already shortened by an
+agent's terminal title.
+
+## Refresh, update, or remove
+
+Normal lifecycle events refresh the sidebar automatically. After manually
+changing a title override or icon setting:
+
+```sh
+herdr plugin action invoke refresh --plugin testy-cool.herdr-sidebar
+```
+
+To update, run `git pull --ff-only` in this checkout, then repeat the install and
+doctor commands. Setup refuses to overwrite files edited after installation;
+use the [manual steps](docs/setup.md) when keeping later customizations.
+
+To restore the files saved during setup:
+
+```sh
+python3 setup_sidebar.py uninstall --dry-run
+python3 setup_sidebar.py uninstall
+```
+
+Removal clears generated tokens, disables the plugin, and restores its backups.
+It keeps the checkout and disabled registration. If any managed file changed
+since setup, removal stops before writing; [manual removal](docs/setup.md#manual-removal)
+explains how to keep those edits.
+
+## For agents and contributors
+
+Start with [AGENTS.md](AGENTS.md). It contains the installation workflow, file
+map, behavior contracts, and verification commands. All setup commands accept
+`--json`; install and uninstall also accept `--dry-run`.
+
+The runtime uses only Python's standard library. It reads a local Herdr snapshot
+and publishes changed display tokens. There is no polling loop, telemetry,
+network service, or API key. [Architecture](docs/architecture.md) documents the
+data flow, token names, icon settings, and development checks.
+
+## Credits and license
+
+Adapted from [moneycaringcoder/herdr-agent-icons](https://github.com/moneycaringcoder/herdr-agent-icons),
+with a borderless Codex mark derived from
+[qintmb/herdr-icon-agent-ui](https://github.com/qintmb/herdr-icon-agent-ui).
+
+Code is [MIT licensed](LICENSE). Provider artwork keeps its original terms and
+trademarks; see [third-party notices](assets/THIRD_PARTY_NOTICES.md). This is an
+independent community plugin, not an official Herdr or provider product.
