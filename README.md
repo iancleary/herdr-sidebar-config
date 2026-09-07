@@ -45,8 +45,9 @@ for custom paths, manual installation, and troubleshooting.
 - **One tab:** agents sit directly beneath their workspace name.
 - **Multiple tabs:** each tab with agents gets a plain heading, with agent
   branches below it. Shell-only tabs count toward the rule but add no empty rows.
-- **Readable labels:** existing terminal titles are cleaned up, with tab and
-  agent names as fallbacks. No model call or generated summary is involved.
+- **Readable labels:** working Codex and Claude panes use their latest meaningful
+  local instruction; terminal, tab, and agent names remain fallbacks. No model
+  call or generated summary is involved.
 - **Native state:** `◔` working, `?` blocked, `✓` completed, `○` idle, `·` unknown.
   These are static symbols, not animated loaders.
 - **Provider icons:** Claude, Codex, OpenCode, OMP, Cline, Mastra Code, Kimi,
@@ -54,8 +55,8 @@ for custom paths, manual installation, and troubleshooting.
 
 The tree is a visual grouping; it does not add collapsible folders. Agent clicks
 and keyboard navigation remain Herdr's native behavior. Long labels are clipped
-to the sidebar width. The plugin cannot recover text already shortened by an
-agent's terminal title.
+to the sidebar width. Session history reads are local, bounded, and performed
+only during existing refresh events.
 
 ## Refresh, update, or remove
 
@@ -88,10 +89,11 @@ Start with [AGENTS.md](AGENTS.md). It contains the installation workflow, file
 map, behavior contracts, and verification commands. All setup commands accept
 `--json`; install and uninstall also accept `--dry-run`.
 
-The runtime uses only Python's standard library. It reads a local Herdr snapshot
-and publishes changed display tokens. There is no polling loop, telemetry,
-network service, or API key. [Architecture](docs/architecture.md) documents the
-data flow, token names, icon settings, and development checks.
+The runtime uses only Python's standard library. It reads a local Herdr snapshot,
+optionally reads a bounded tail of matching Codex or Claude history, and publishes
+changed display tokens. There is no polling loop, telemetry, network service, or
+API key. [Architecture](docs/architecture.md) documents the data flow, token names,
+icon settings, and development checks.
 
 ## Credits and license
 

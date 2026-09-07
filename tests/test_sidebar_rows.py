@@ -1,8 +1,41 @@
+import json
+import tempfile
 import unittest
+from pathlib import Path
+from unittest.mock import patch
 from sidebar import task_label, desired_rows, changed_tokens
 
 
 class SidebarRowsTests(unittest.TestCase):
+    def test_working_agent_uses_latest_meaningful_codex_task(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            history = Path(tmp) / ".codex" / "history.jsonl"
+            history.parent.mkdir()
+            history.write_text("\n".join([
+                json.dumps({
+                    "session_id": "session-1",
+                    "ts": 1,
+                    "text": "[Image #1] Integrate the worker commits and run the installed Mac acceptance.",
+                }),
+                "not valid json",
+                json.dumps({
+                    "session_id": "session-1",
+                    "ts": 2,
+                    "text": "How's it going?",
+                }),
+            ]) + "\n")
+            pane = {
+                "agent": "codex",
+                "agent_status": "working",
+                "terminal_title_stripped": "augmented-wolf",
+                "agent_session": {"kind": "id", "value": "session-1"},
+            }
+            with patch("sidebar.Path.home", return_value=Path(tmp)):
+                self.assertEqual(
+                    task_label(pane, {}),
+                    "Integrate the worker commits and run the installed Mac acceptance",
+                )
+
     def test_task_ignores_session_path_and_vague_followup(self):
         pane = {"agent": "codex", "terminal_title_stripped":
                 "[33] ~/Work/project | Review the launch flow | are you still on …"}
@@ -39,7 +72,7 @@ class SidebarRowsTests(unittest.TestCase):
         existing = {"hs_group": "project", "hs_working": "⠿ Review"}
         self.assertEqual(changed_tokens(existing, desired), {})
 
-    def test_tree_groups_agents_beneath_each_tab_once(self):
+    def test_tab_groups_use_compact_tree_guides(self):
         panes = [
             {"pane_id": "w1:p1", "workspace_id": "w1", "tab_id": "w1:t1", "agent": "codex"},
             {"pane_id": "w1:p2", "workspace_id": "w1", "tab_id": "w1:t1", "agent": "claude"},
@@ -50,9 +83,9 @@ class SidebarRowsTests(unittest.TestCase):
         self.assertEqual(rows["w1:p1"]["hs_tab"], "main")
         self.assertIsNone(rows["w1:p2"]["hs_tab"])
         self.assertEqual(rows["w1:p3"]["hs_tab"], "\u2800\u2800docs")
-        self.assertTrue(rows["w1:p1"]["hs_logo"].startswith("\u2800\u2800├─ "))
-        self.assertTrue(rows["w1:p2"]["hs_logo"].startswith("\u2800\u2800\u2800\u2800└─ "))
-        self.assertTrue(rows["w1:p3"]["hs_logo"].startswith("\u2800\u2800└─ "))
+        self.assertEqual(rows["w1:p1"]["hs_logo"], "├─ \ue1a1")
+        self.assertEqual(rows["w1:p2"]["hs_logo"], "\u2800\u2800└─ \ue1a0")
+        self.assertEqual(rows["w1:p3"]["hs_logo"], "└─ \ue1a1")
 
         # A close/move clears the former heading and updates the remaining branch.
         panes[0].pop("agent")

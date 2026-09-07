@@ -8,7 +8,7 @@ decides how Herdr draws them; the bundled font supplies provider marks.
 Herdr lifecycle event
   -> run.sh -> sidebar.py
   -> herdr api snapshot
-  -> workspace/tab grouping and title cleanup
+  -> workspace/tab grouping and task-title selection
   -> compare desired tokens with current tokens
   -> herdr pane report-metadata (changed panes only)
   -> Herdr renders sidebar-layout.toml
@@ -32,11 +32,13 @@ The outer workspace-to-tab connection has no branch. Under each tab, agents use
 `├─` and `└─`. A workspace with one tab has neither tab headings nor branches.
 The tree is presentational, with native Herdr row selection and navigation.
 
-Titles prefer a user `hs_title` token. Otherwise they use the existing terminal
-title, skipping paths, numeric prefixes, notification markup, and some vague
-follow-ups. A named Claude session gets priority; tab/pane/provider names are
-fallbacks. These are deterministic heuristics, not conversation analysis. A
-native title already clipped by its producer cannot be reconstructed.
+Titles prefer a user `hs_title` token. For a working Codex or Claude pane with a
+native session ID, the plugin scans at most the final 512 KiB of that provider's
+local history and selects its latest meaningful user instruction. Malformed
+records, injected instruction headers, screenshot markers, and vague follow-ups
+are skipped. Other cases use the existing terminal title, then tab, pane, and
+provider fallbacks. These are deterministic local heuristics, not conversation
+analysis or a model call.
 
 ## Token contract
 

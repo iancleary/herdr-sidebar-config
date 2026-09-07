@@ -1,6 +1,7 @@
 """Publish compact task rows from native Herdr facts, only when values change."""
 import fcntl
 import argparse
+import json
 import os
 import re
 import sys
@@ -10,12 +11,75 @@ from runtime import PLUGIN_ID, herdr_binary, icon_mode, logo_for, run_herdr
 STATES = {"working": "◔", "blocked": "?", "done": "✓", "idle": "○", "unknown": "·"}
 # A braille blank occupies a terminal cell but survives metadata trimming.
 BLANK = "\u2800"
+HISTORY = {
+    "codex": (".codex/history.jsonl", "session_id", "text"),
+    "claude": (".claude/history.jsonl", "sessionId", "display"),
+}
+VAGUE = re.compile(
+    r"^(yes|okay|ok|go ahead|go on|continue|nice|thank|where we at|are you still|"
+    r"how(?:'s| is) it going|also i like)\b",
+    re.I,
+)
+
+
+def _task_text(value):
+    if not isinstance(value, str):
+        return None
+    for raw in value.splitlines():
+        text = re.sub(r"\s+", " ", raw).strip().lstrip("#>*- ")
+        text = re.sub(r"^(?:\[Image #\d+\]\s*)+", "", text, flags=re.I)
+        if not text or text.startswith(("AGENTS.md instructions", "<environment_context", "<INSTRUCTIONS", "<skill")):
+            continue
+        if VAGUE.match(text):
+            continue
+        text = re.sub(r"^(?:can|could|would) (?:you|we) (?:please )?", "", text, flags=re.I)
+        return text[:96].rstrip(" ,.;:-")
+    return None
+
+
+def _reverse_history(path, max_bytes=512 * 1024):
+    try:
+        with path.open("rb") as stream:
+            end = stream.seek(0, os.SEEK_END)
+            start = max(0, end - max_bytes)
+            stream.seek(start)
+            data = stream.read()
+    except OSError:
+        return
+    if start:
+        data = data.split(b"\n", 1)[-1]
+    for raw in reversed(data.splitlines()):
+        yield raw.decode("utf-8", "replace")
+
+
+def latest_history_task(pane):
+    source = HISTORY.get(pane.get("agent"))
+    session = pane.get("agent_session") or {}
+    session_id = session.get("value") if isinstance(session, dict) else None
+    if not source or not session_id:
+        return None
+    relative_path, session_key, text_key = source
+    for line in _reverse_history(Path.home() / relative_path):
+        try:
+            record = json.loads(line)
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if record.get(session_key) != session_id:
+            continue
+        text = _task_text(record.get(text_key))
+        if text:
+            return text
+    return None
 
 
 def task_label(pane, tabs):
     tokens = pane.get("tokens") or {}
     if tokens.get("hs_title"):
         return tokens["hs_title"]
+    if pane.get("agent_status") == "working":
+        task = latest_history_task(pane)
+        if task:
+            return task[:1].upper() + task[1:]
     raw = pane.get("terminal_title_stripped") or ""
     parts = [p.strip().rstrip(".… ") for p in raw.split(" | ")]
     candidates = [p for p in parts if p and not p.startswith(("[", "~/", "/", "<"))
@@ -23,9 +87,8 @@ def task_label(pane, tabs):
     # Claude's named session is more durable than its transient prompt snippets.
     if candidates and re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+){2,}", candidates[0]):
         return candidates[0].replace("-", " ").capitalize()
-    vague = re.compile(r"^(yes|okay|ok|go ahead|thank|where we at|are you still|also i like)\b", re.I)
     for text in reversed(candidates):
-        if not vague.match(text):
+        if not VAGUE.match(text):
             text = re.sub(r"^(?:can|could|would) (?:you|we) (?:please )?", "", text, flags=re.I)
             return text[:1].upper() + text[1:]
     tab = tabs.get(pane.get("tab_id"), "")
@@ -85,7 +148,6 @@ def desired_rows(panes, workspaces, tabs, icons="font"):
             logo = logo_for(pane["agent"], icons)
             if show_tree:
                 prefix = "" if first_in_tab else BLANK * 2
-                prefix += BLANK * 2
                 prefix += "└─ " if last_in_tab else "├─ "
             else:
                 prefix = "" if heading else BLANK * 2
