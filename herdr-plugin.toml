@@ -1,0 +1,71 @@
+id = "testy-cool.herdr-sidebar"
+name = "Herdr Sidebar"
+version = "0.1.0"
+min_herdr_version = "0.8.2"
+description = "Readable agent tasks grouped by workspace and tab, with compact rows and provider icons."
+platforms = ["linux", "macos"]
+
+[[startup]]
+command = ["sh", "run.sh"]
+
+[[actions]]
+id = "refresh"
+title = "Refresh agent sidebar"
+description = "Update headings, agent labels, and state indicators from the current session."
+contexts = ["global"]
+command = ["sh", "run.sh"]
+
+[[actions]]
+id = "clear"
+title = "Clear sidebar display tokens"
+description = "Remove this plugin's generated display values before disabling it."
+contexts = ["global"]
+command = ["sh", "run.sh", "--clear"]
+
+[[events]]
+on = "pane.agent_detected"
+command = ["sh", "run.sh"]
+
+[[events]]
+on = "pane.closed"
+command = ["sh", "run.sh"]
+
+[[events]]
+on = "pane.exited"
+command = ["sh", "run.sh"]
+
+[[events]]
+on = "pane.moved"
+command = ["sh", "run.sh"]
+
+[[events]]
+on = "tab.created"
+command = ["sh", "run.sh"]
+
+[[events]]
+on = "tab.moved"
+command = ["sh", "run.sh"]
+
+[[events]]
+on = "tab.closed"
+command = ["sh", "run.sh"]
+
+[[events]]
+on = "workspace.renamed"
+command = ["sh", "run.sh"]
+
+[[events]]
+on = "pane.agent_status_changed"
+command = ["sh", "run.sh"]
+
+[[events]]
+on = "pane.focused"
+command = ["sh", "run.sh"]
+
+[[events]]
+on = "tab.focused"
+command = ["sh", "run.sh"]
+
+[[events]]
+on = "tab.renamed"
+command = ["sh", "run.sh"]

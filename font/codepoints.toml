@@ -1,0 +1,13 @@
+family = "Herdr Harness Logos"
+version = "1.1.0"
+
+[glyphs]
+claude = "E1A0"
+codex = "E1A1"
+opencode = "E1A2"
+omp = "E1A3"
+cline = "E1A4"
+mastracode = "E1A5"
+kimi = "E1A6"
+kilo = "E1A7"
+maki = "E1A8"

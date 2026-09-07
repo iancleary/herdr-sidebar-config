@@ -1,0 +1,10 @@
+<!--
+  Derived from openai/codex success.html at commit 892000d7.
+  Source: https://github.com/openai/codex/blob/892000d738bccf837d22845884b93b83f15ac209/codex-rs/login/src/assets/success.html
+  License: Apache-2.0. Modified: official strokes expanded to monochrome outlines for font use.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <path fill-rule="evenodd" d="M16 0A16 16 0 1 1 16 32A16 16 0 0 1 16 0ZM16 2.484A13.516 13.516 0 1 0 16 29.516A13.516 13.516 0 0 0 16 2.484Z"/>
+  <path d="M8.575 11.688L10.748 10.486L12.728 14.062Q13.61 15.86 12.711 17.61L10.737 21.019L8.587 19.775L10.471 16.522Q10.75 16.04 10.458 15.512Z"/>
+  <path d="M17.17 18.555H22.356A1.242 1.242 0 0 1 22.356 21.039H17.17A1.242 1.242 0 0 1 17.17 18.555Z"/>
+</svg>

@@ -1,0 +1,8 @@
+<!--
+  Derived from anomalyco/opencode packages/identity/mark.svg at commit 4643e65a.
+  Source: https://github.com/anomalyco/opencode/blob/4643e65ad6334de3e4e68dedc201d5fbb828c9fe/packages/identity/mark.svg
+  License: MIT. Modified: background/two-tone fills removed for monochrome font use.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <path fill-rule="evenodd" d="M384 416H128V96H384V416ZM320 160H192V352H320V160Z"/>
+</svg>

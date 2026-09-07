@@ -1,0 +1,11 @@
+<!--
+  Derived from MoonshotAI/kimi-cli web/public/logo.png at commit
+  cbc15c076d17f70fec9f89c90c0502e68657f505.
+  License: Apache-2.0, copyright the Kimi CLI repository contributors.
+  Modified: raster mark redrawn as a monochrome vector; rounded background and
+  colour removed while retaining the K and dot at terminal size.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <path d="M34 29H51V59L75 31H91L69 62L101 99H79L51 69V99H34Z"/>
+  <path d="M109 18A10 10 0 1 1 109 38A10 10 0 0 1 109 18Z"/>
+</svg>

@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+
+# The font build environment. `requirements-font.txt` is the authored input;
+# the environment it produces is not.
+.venv-font/
+.venv/
+
+.ruff_cache/
+.pytest_cache/
+
+# dist/ is deliberately NOT ignored. The TTF is what a user installs, and asking
+# them to stand up a virtual environment and run fontTools before they can see a
+# glyph would be absurd for a plugin this small. It is committed as a pinned
+# artefact rather than as build output: the build is byte-for-byte deterministic
+# and tests/test_font.py asserts that the committed file equals a fresh build,
+# so it cannot drift silently from assets/svg/.
