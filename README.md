@@ -115,6 +115,8 @@ changed display tokens. There is no polling loop, telemetry, network service, or
 API key. [Architecture](docs/architecture.md) documents the data flow, token names,
 icon settings, and development checks.
 
+Maintainers should use the checked-in deterministic [release process](docs/release.md).
+
 ## Credits and license
 
 Adapted from [moneycaringcoder/herdr-agent-icons](https://github.com/moneycaringcoder/herdr-agent-icons),
