@@ -1,8 +1,8 @@
 id = "testy-cool.herdr-sidebar"
-name = "Herdr Sidebar"
+name = "Herdr Sidebar Config"
 version = "0.1.0"
 min_herdr_version = "0.8.2"
-description = "Readable agent tasks grouped by workspace and tab, with compact rows and provider icons."
+description = "Workspace, tab, and agent tree preset with compact single-tab groups, readable tasks, and provider icons."
 platforms = ["linux", "macos"]
 
 [[startup]]

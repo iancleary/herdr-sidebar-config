@@ -1,10 +1,11 @@
-# Herdr Sidebar
+# Herdr Sidebar Config
 
 **See what each agent is doing, grouped by workspace and tab.**
 
-A small [Herdr](https://herdr.dev) plugin with readable task labels, provider
-icons, and a compact tree that appears only when a workspace has multiple tabs.
-No Herdr fork or font build required.
+A [Herdr](https://herdr.dev) sidebar preset: **workspace → tab → agent**, with
+readable task labels and provider icons. Single-tab workspaces stay compact;
+multiple tabs get a tree. Includes the configuration, icon font, and companion
+plugin that keeps the rows current. No Herdr fork or font build required.
 
 ![Herdr Sidebar showing two tabs under herdr-sidebar and a compact icon-font workspace](docs/sidebar.png)
 
@@ -20,8 +21,8 @@ provided but have not been tested in a live terminal.
 Run inside a Herdr terminal pane:
 
 ```sh
-git clone https://github.com/testy-cool/herdr-sidebar.git
-cd herdr-sidebar
+git clone https://github.com/testy-cool/herdr-sidebar-config.git
+cd herdr-sidebar-config
 python3 setup_sidebar.py install
 python3 setup_sidebar.py doctor
 ```

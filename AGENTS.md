@@ -1,8 +1,12 @@
-# Working with Herdr Sidebar
+# Working with Herdr Sidebar Config
 
-This repository is a Herdr plugin that groups existing agents by workspace and
-tab. It publishes display metadata and supplies a sidebar layout and icon font.
-It does not launch agents, generate summaries, or implement Herdr's renderer.
+This repository packages a workspace → tab → agent sidebar preset for Herdr:
+configuration, an icon font, and a companion plugin. The plugin publishes display
+metadata to group existing agents. It does not launch agents, generate summaries,
+or implement Herdr's renderer.
+
+The repository is `testy-cool/herdr-sidebar-config`. The installed plugin ID stays
+`testy-cool.herdr-sidebar` so existing configurations and metadata remain valid.
 
 ## Install for a user
 
