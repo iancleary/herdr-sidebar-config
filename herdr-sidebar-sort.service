@@ -1,0 +1,7 @@
+[Unit]
+Description=Refresh Herdr sidebar after client preference changes
+
+[Service]
+Type=oneshot
+ExecStart=%h/.nix-profile/bin/herdr plugin action invoke refresh --plugin iancleary.herdr-sidebar
+TimeoutStartSec=20

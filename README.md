@@ -1,10 +1,11 @@
 # Herdr Sidebar Config
 
-**See what each agent is doing, grouped by workspace and tab.**
+**See what each agent is doing, grouped by repo, worktree, and tab.**
 
-A [Herdr](https://herdr.dev) sidebar preset: **workspace → tab → agent**, with
-readable task labels and provider icons. Single-tab workspaces stay compact;
-multiple tabs get a tree. Includes the configuration, icon font, and companion
+A [Herdr](https://herdr.dev) sidebar preset: **repo → worktree/branch → tab →
+agent**, with readable task labels and provider icons. Single-tab workspaces
+stay compact; multiple tabs show their tab label inline on each agent row.
+Includes the configuration, icon font, and companion
 plugin that keeps the rows current. No Herdr fork or font build required.
 
 ![Herdr Sidebar showing two tabs under herdr-sidebar and a compact icon-font workspace](docs/sidebar.png)
@@ -47,9 +48,12 @@ Ghostty process may still use its old font cache.
 Want to inspect the changes first? Run `.venv/bin/python setup_sidebar.py install --dry-run`.
 For another terminal, run `.venv/bin/python setup_sidebar.py install --text` to use short
 provider labels such as `AI` and `C`, with no font or Ghostty changes.
+Grouped ordering is the default. To keep Herdr's priority ordering while still
+showing repo, branch/worktree, and tab context inline, install with
+`.venv/bin/python setup_sidebar.py install --sort priority`.
 
 Setup links this checkout as a plugin, replaces the agent sidebar layout, sets
-workspace sorting, and backs up modified files. It preserves other Herdr
+the selected agent panel sort, and backs up modified files. It preserves other Herdr
 settings. Keep the checkout where you installed it. See [setup details](docs/setup.md)
 for custom paths, manual installation, and troubleshooting.
 
@@ -62,9 +66,12 @@ between agent hosts and viewing clients.
 
 ## What changes
 
-- **One tab:** agents sit directly beneath their workspace name.
-- **Multiple tabs:** each tab with agents gets a plain heading, with agent
-  branches below it. Shell-only tabs count toward the rule but add no empty rows.
+- **Grouped sort:** agents are shown beneath repo and branch/worktree headings
+  when Herdr exposes worktree provenance. Multiple tabs add a tab label inline
+  before the status and task. Shell-only tabs count toward the rule but add no
+  empty rows.
+- **Priority sort:** agents keep Herdr's priority order and show repo,
+  branch/worktree, and tab context inline on each row.
 - **Readable labels:** working Codex and Claude panes use their latest meaningful
   local instruction; terminal, tab, and agent names remain fallbacks. No model
   call or generated summary is involved.

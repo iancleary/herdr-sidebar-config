@@ -18,6 +18,15 @@ from runtime import PLUGIN_ID, herdr_binary, run_herdr
 
 ROOT = Path(__file__).resolve().parent
 FONT = "HerdrSidebarLogos-Regular.ttf"
+SORT_ALIASES = {"grouped": "spaces"}
+
+
+def sort_value(value):
+    return SORT_ALIASES.get(value, value)
+
+
+def layout_path(sort):
+    return ROOT / ("sidebar-layout-priority.toml" if sort == "priority" else "sidebar-layout.toml")
 
 
 def digest(data):
@@ -77,7 +86,8 @@ def invoke(binary, action):
 
 def plan(args, config_dir):
     original = read(args.config) or b""
-    result = {args.config: merge_layout(original.decode(), (ROOT / "sidebar-layout.toml").read_text()).encode(),
+    sort = sort_value(args.sort)
+    result = {args.config: merge_layout(original.decode(), layout_path(sort).read_text(), sort).encode(),
               config_dir / "config.toml": ('icons = "text"\n' if args.text else 'icons = "font"\n').encode()}
     if not args.text:
         result[args.ghostty_config] = ghostty_mapping((read(args.ghostty_config) or b"").decode()).encode()
@@ -86,6 +96,7 @@ def plan(args, config_dir):
 
 
 def install(args, binary):
+    sort = sort_value(args.sort)
     existing = plugin_info(binary)
     if existing and Path(existing["plugin_root"]).resolve() != ROOT:
         raise RuntimeError("This plugin is installed from another directory. Run setup from that checkout.")
@@ -94,7 +105,8 @@ def install(args, binary):
     changes = {p: data for p, data in files.items() if read(p) != data}
     summary = {"status": "planned", "message": "Herdr Sidebar installation plan",
                "files": [str(p) for p in changes], "plugin": PLUGIN_ID,
-               "notes": ["Replaces only agent sidebar settings and sets workspace sorting.",
+               "sort": sort,
+               "notes": [f"Replaces only agent sidebar settings and sets agent panel sort to {sort}.",
                          "Runtime reports display tokens; it does not prompt or stop agents."]}
     if args.dry_run:
         emit(summary, args.json)
@@ -183,10 +195,11 @@ def doctor(args, binary):
     info = plugin_info(binary)
     config = tomllib.loads(args.config.read_text()) if args.config.exists() else {}
     actual = config.get("ui", {}).get("sidebar", {}).get("agents", {})
-    wanted = tomllib.loads((ROOT / "sidebar-layout.toml").read_text())["ui"]["sidebar"]["agents"]
+    sort = sort_value(args.sort)
+    wanted = tomllib.loads(layout_path(sort).read_text())["ui"]["sidebar"]["agents"]
     logs = run_herdr(binary, "plugin", "log", "list", "--plugin", PLUGIN_ID, "--limit", "1")["result"]["logs"]
     checks = {"plugin_enabled": bool(info and info["enabled"]), "layout_matches": actual == wanted,
-              "workspace_sort": config.get("ui", {}).get("agent_panel_sort") == "spaces",
+              "agent_panel_sort": config.get("ui", {}).get("agent_panel_sort") == sort,
               "latest_hook_succeeded": bool(logs and logs[-1]["status"] == "succeeded")}
     settings_path = plugin_config_dir(binary) / "config.toml"
     settings = tomllib.loads(settings_path.read_text()) if settings_path.exists() else {}
@@ -206,6 +219,8 @@ def main():
     parser.add_argument("--dry-run", action="store_true", help="show planned file changes without writing")
     parser.add_argument("--json", action="store_true", help="emit machine-readable output")
     parser.add_argument("--text", action="store_true", help="use text labels; do not install or configure a font")
+    parser.add_argument("--sort", choices=["spaces", "grouped", "priority"], default="spaces",
+                        help='agent panel ordering/layout variant: "spaces"/"grouped" or "priority"')
     xdg = Path(os.environ.get("XDG_CONFIG_HOME", str(Path.home() / ".config")))
     parser.add_argument("--config", type=Path, default=Path(os.environ.get("HERDR_CONFIG_PATH", str(xdg / "herdr/config.toml"))))
     ghostty = (Path.home() / "Library/Application Support/com.mitchellh.ghostty/config" if sys.platform == "darwin" else xdg / "ghostty/config")
