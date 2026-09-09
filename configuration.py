@@ -14,12 +14,12 @@ def sections(text):
              m.group(1).strip("[]").strip()) for i, m in enumerate(matches)]
 
 
-def merge_layout(text, fragment):
+def merge_layout(text, fragment, sort="spaces"):
     before = tomllib.loads(text)
     layout = tomllib.loads(fragment)["ui"]["sidebar"]["agents"]
     expected = copy.deepcopy(before)
     ui = expected.setdefault("ui", {})
-    ui["agent_panel_sort"] = "spaces"
+    ui["agent_panel_sort"] = sort
     ui.setdefault("sidebar", {})["agents"] = layout
     if before == expected:
         return text
@@ -34,17 +34,18 @@ def merge_layout(text, fragment):
         start, end = ui_section
         block = result[start:end]
         setting = re.compile(r'(?m)^[ \t]*agent_panel_sort[ \t]*=.*$')
+        replacement = f'agent_panel_sort = "{sort}"'
         if setting.search(block):
-            block = setting.sub('agent_panel_sort = "spaces"', block)
+            block = setting.sub(replacement, block)
         else:
             newline = block.find("\n")
             if newline < 0:
-                block += '\nagent_panel_sort = "spaces"\n'
+                block += f'\n{replacement}\n'
             else:
-                block = block[:newline + 1] + 'agent_panel_sort = "spaces"\n' + block[newline + 1:]
+                block = block[:newline + 1] + replacement + "\n" + block[newline + 1:]
         result = result[:start] + block + result[end:]
     else:
-        result = result.rstrip() + '\n\n[ui]\nagent_panel_sort = "spaces"\n'
+        result = result.rstrip() + f'\n\n[ui]\nagent_panel_sort = "{sort}"\n'
     result = result.rstrip() + "\n\n" + fragment.strip() + "\n"
     try:
         actual = tomllib.loads(result)

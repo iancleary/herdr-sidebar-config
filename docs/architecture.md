@@ -8,7 +8,7 @@ decides how Herdr draws them; the bundled font supplies provider marks.
 Herdr lifecycle event
   -> run.sh -> sidebar.py
   -> herdr api snapshot
-  -> workspace/tab grouping and task-title selection
+  -> repo/worktree/tab grouping and task-title selection
   -> compare desired tokens with current tokens
   -> herdr pane report-metadata (changed panes only)
   -> Herdr renders sidebar-layout.toml
@@ -29,14 +29,29 @@ files do not propagate between machines.
 ## Grouping and titles
 
 Snapshot order follows Herdr's workspace/tab/pane order. The layout requires
-workspace sorting (`agent_panel_sort = "spaces"`) to keep headers beside their
-agents. A workspace header lives on its first agent; a tab header lives on its
-first agent within a workspace with more than one actual tab. Shell-only tabs
-count toward tab identity but produce no agent rows.
+grouped workspace sorting (`agent_panel_sort = "spaces"`) to keep repo and
+branch/worktree headers beside their agents. The grouped layout writes a repo
+header on the first agent for each repo key and a branch/worktree header on the
+first agent for each workspace when a branch-like label is available. In
+workspaces with more than one actual tab, the tab label is included inline on
+each agent row before the status and task. Shell-only tabs count toward tab
+identity but produce no agent rows.
 
-The outer workspace-to-tab connection has no branch. Under each tab, agents use
-`├─` and `└─`. A workspace with one tab has neither tab headings nor branches.
-The tree is presentational, with native Herdr row selection and navigation.
+The priority layout uses `agent_panel_sort = "priority"` and does not emit
+grouping rows because Herdr may render agents out of workspace order. Instead,
+each row includes repo, branch/worktree, and tab context inline before the
+status and task.
+
+When multiple tabs are present, agents use `├─`, `│  ├─`, and `│  └─` to show
+compact sibling grouping without invisible spacers. A workspace with one tab has
+neither tab labels nor branches. The tree is presentational, with native Herdr
+row selection and navigation.
+
+Repo labels come from `workspace.worktree.repo_name` when Herdr exposes
+worktree provenance; otherwise the workspace label is used. Branch labels use a
+future-compatible `workspace.branch` value when present. Current public Herdr
+API snapshots expose worktree checkout provenance but not branch, so linked
+worktree rows fall back to the workspace label or checkout directory name.
 
 Titles prefer a user `ihs_title` token. For a working Codex or Claude pane with a
 native session ID, the plugin scans at most the final 512 KiB of that provider's
@@ -52,11 +67,15 @@ Publisher: `plugin:iancleary.herdr-sidebar`.
 
 | Token | Meaning |
 | --- | --- |
-| `ihs_group` | Workspace heading on its first agent |
-| `ihs_tab` | Tab heading on its first agent, when multiple tabs exist |
-| `ihs_logo` | Indentation, optional branch, and provider icon/text |
+| `ihs_group` | Cleared compatibility token from older layouts |
+| `ihs_repo` | Grouped-layout repo heading on its first agent |
+| `ihs_branch` | Grouped-layout branch/worktree heading on its first agent |
+| `ihs_tab` | Cleared compatibility token from older layouts |
+| `ihs_logo` | Optional branch and provider icon/text |
+| `ihs_tab_context` | Grouped-layout tab label when a workspace has multiple tabs |
+| `ihs_context` | Priority-layout inline repo, branch/worktree, and tab context |
 | `ihs_working`, `ihs_blocked`, `ihs_done`, `ihs_idle`, `ihs_unknown` | Exactly one populated with the native status symbol and task label |
-| `ihs_gap` | Blank row after the last agent before another workspace |
+| `ihs_gap` | Cleared compatibility token from older layouts |
 | `ihs_title` | Optional user-owned title override; read but never written or cleared by this plugin |
 
 Absent generated values are cleared, including when a pane stops being an
@@ -64,9 +83,9 @@ agent. Native identity/state and other plugins' metadata are not overwritten.
 `clear` removes generated values from the current session. Run it before
 disabling the plugin; future lifecycle events can repopulate them while enabled.
 
-U+2800, a blank braille cell, preserves indentation through metadata whitespace
-trimming. It is a spacer, not a loader. Herdr's first and continuation rows have
-different native offsets, so the prefix arithmetic is intentional.
+Generated tokens avoid invisible spacer glyphs such as U+2800. Indentation is
+limited to visible branch prefixes so terminal fonts do not need to provide a
+blank glyph for intentionally empty cells.
 
 ## Icon configuration
 

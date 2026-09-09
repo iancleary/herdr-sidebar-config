@@ -1,0 +1,9 @@
+[Unit]
+Description=Watch single-client Herdr sort preferences
+
+[Path]
+PathChanged=%h/.local/state/herdr/client-shell
+Unit=herdr-sidebar-sort.service
+
+[Install]
+WantedBy=default.target

@@ -5,12 +5,12 @@ import json
 import os
 import re
 import sys
+import subprocess
 from pathlib import Path
 from runtime import PLUGIN_ID, herdr_binary, icon_mode, logo_for, run_herdr
+from client_sort import client_sort
 
 STATES = {"working": "◔", "blocked": "?", "done": "✓", "idle": "○", "unknown": "·"}
-# A braille blank occupies a terminal cell but survives metadata trimming.
-BLANK = "\u2800"
 HISTORY = {
     "codex": (".codex/history.jsonl", "session_id", "text"),
     "claude": (".claude/history.jsonl", "sessionId", "display"),
@@ -101,62 +101,149 @@ def task_label(pane, tabs):
         pane.get("agent"), f"{pane.get('agent', 'Agent')} session")
 
 
+def compact_branch_label(value):
+    if not value:
+        return None
+    return value.removeprefix("worktree/") or value
+
+
+def workspace_context(workspace):
+    worktree = workspace.get("worktree") or {}
+    repo_key = worktree.get("repo_key") or workspace["workspace_id"]
+    repo = worktree.get("repo_name") or workspace.get("label") or "workspace"
+    # A workspace label identifies the checkout; it is not a guessed Git branch.
+    branch = workspace.get("branch") or workspace.get("label") or workspace["workspace_id"]
+    return {"repo_key": repo_key, "repo": repo, "branch": branch}
+
+
+def with_checkout_branches(workspaces, panes=()):
+    """Read branch identity once per checkout per refresh, without guessing paths."""
+    branches = {}
+    result = []
+    for workspace in workspaces:
+        path = (workspace.get("worktree") or {}).get("checkout_path")
+        if not path:
+            directories = {p["cwd"] for p in panes
+                           if p.get("workspace_id") == workspace["workspace_id"]
+                           and p.get("cwd") and Path(p["cwd"]).is_absolute()}
+            # Older/plain workspaces may not expose worktree provenance.
+            # Use native cwd only when it identifies one unambiguous checkout.
+            if len(directories) == 1:
+                path = directories.pop()
+        branch = workspace.get("branch")
+        if not branch and path and Path(path).is_absolute():
+            if path not in branches:
+                try:
+                    proc = subprocess.run(
+                        ["git", "-C", path, "symbolic-ref", "--quiet", "--short", "HEAD"],
+                        capture_output=True, text=True, timeout=2,
+                    )
+                    branches[path] = proc.stdout.strip() if proc.returncode == 0 else None
+                except (OSError, subprocess.TimeoutExpired):
+                    branches[path] = None
+            branch = branches[path]
+        result.append({**workspace, "branch": branch})
+    return result
+
+
 def desired_headers(panes, workspaces):
-    names = {w["workspace_id"]: w["label"] for w in workspaces}
+    contexts = {w["workspace_id"]: workspace_context(w) for w in workspaces}
     seen = set()
     result = {}
     for pane in panes:
         workspace = pane["workspace_id"]
-        heading = None
-        if pane.get("agent") and workspace not in seen:
-            heading = names.get(workspace)
-            seen.add(workspace)
-        result[pane["pane_id"]] = heading
+        repo = branch = None
+        if pane.get("agent"):
+            context = contexts.get(workspace, {"repo_key": workspace, "repo": workspace, "branch": None})
+            repo_key = context["repo_key"]
+            if repo_key not in seen:
+                repo = context["repo"]
+                seen.add(repo_key)
+            branch_key = (repo_key, workspace)
+            if branch_key not in seen and context["branch"]:
+                branch = context["branch"]
+                seen.add(branch_key)
+        result[pane["pane_id"]] = {"repo": repo, "branch": branch}
     return result
 
 
-def desired_rows(panes, workspaces, tabs, icons="font"):
+def desired_rows(panes, workspaces, tabs, icons="font", sort="spaces"):
     headers = desired_headers(panes, workspaces)
-    groups = {}
-    tab_ids = {}
-    for pane in panes:
-        tab_ids.setdefault(pane["workspace_id"], set()).add(pane.get("tab_id"))
-        if pane.get("agent"):
-            groups.setdefault(pane["workspace_id"], {}).setdefault(
-                pane.get("tab_id"), []
-            ).append(pane["pane_id"])
-    previous = None
+    contexts = {w["workspace_id"]: workspace_context(w) for w in workspaces}
+    # Follow native pane order: the plugin cannot reorder Herdr's agent panel.
+    # Restart a heading if a family appears again after another family.
+    agents = [pane for pane in panes if pane.get("agent")]
+    priority_grouping = sort == "priority" and all(
+        isinstance(pane.get("state_change_seq"), int) for pane in agents)
+    if priority_grouping:
+        # Match Herdr's stable status-descending, recency-descending ordering.
+        ranks = {"blocked": 4, "done": 3, "working": 2, "idle": 1, "unknown": 0}
+        agents.sort(key=lambda pane: (
+            -ranks.get(pane.get("agent_status"), 0), -pane["state_change_seq"],
+            pane.get("_agent_order", panes.index(pane)),
+        ))
+    position = {pane["pane_id"]: index for index, pane in enumerate(agents)}
     result = {}
     for pane in panes:
         heading = headers[pane["pane_id"]]
-        values = {"ihs_group": heading, "ihs_tab": None,
-                  "ihs_gap": None, "ihs_logo": None}
+        values = {"ihs_group": None, "ihs_repo": heading["repo"], "ihs_branch": heading["branch"],
+                  "ihs_tab": None, "ihs_gap": None, "ihs_logo": None,
+                  "ihs_tab_context": None, "ihs_context": None,
+                  "ihs_row_logo": None, "ihs_status": None, "ihs_space_title": None,
+                  "ihs_row_branch": None, "ihs_row_tab": None}
         values.update({f"ihs_{state}": None for state in STATES})
         if pane.get("agent"):
-            if heading and previous is not None:
-                result[previous]["ihs_gap"] = BLANK
             tab_id = pane.get("tab_id")
-            workspace_tabs = groups[pane["workspace_id"]]
-            show_tree = len(tab_ids[pane["workspace_id"]]) > 1
-            siblings = workspace_tabs[tab_id]
-            first_in_tab = pane["pane_id"] == siblings[0]
-            last_in_tab = pane["pane_id"] == siblings[-1]
-            if show_tree and first_in_tab:
-                tab_label = tabs.get(tab_id) or "tab"
-                # Continuation rows start two cells to the right of first rows.
-                values["ihs_tab"] = ("" if heading else BLANK * 2) + tab_label
+            context = contexts.get(pane["workspace_id"], {})
             logo = logo_for(pane["agent"], icons)
-            if show_tree:
-                prefix = "" if first_in_tab else BLANK * 2
-                prefix += "└─ " if last_in_tab else "├─ "
-            else:
-                prefix = "" if heading else BLANK * 2
-            values["ihs_logo"] = prefix + logo
+            index = position[pane["pane_id"]]
+            previous = agents[index - 1] if index else None
+            same_workspace = previous and previous["workspace_id"] == pane["workspace_id"]
+            previous_context = contexts.get(previous["workspace_id"], {}) if previous else {}
+            same_family = previous and previous_context.get("repo_key") == context.get("repo_key")
+            values["ihs_repo"] = None if same_family else context.get("repo")
+            branch_label = context.get("branch", pane["workspace_id"])
+            values["ihs_branch"] = None if same_workspace or branch_label == context.get("repo") else branch_label
+            # Keep the logo free of tree guides so priority layout stays flat.
+            values["ihs_logo"] = logo
+            tab_label = tabs.get(tab_id) or "tab"
+            values["ihs_tab_context"] = tab_label + " ·"
+            # Herdr indents the first visible row by 1 cell, later rows by 3.
+            # U+2800 survives metadata trimming; the local Complete font maps
+            # it to the ordinary space glyph. Only heading-less rows need it.
+            if not values["ihs_repo"] and not values["ihs_branch"]:
+                values["ihs_tab_context"] = "\u2800\u2800" + values["ihs_tab_context"]
+            # Linked worktrees sit two cells deeper than their parent checkout.
+            linked = bool(next((w.get("worktree", {}).get("is_linked_worktree")
+                                for w in workspaces if w["workspace_id"] == pane["workspace_id"]
+                                and w.get("worktree")), False))
+            workspace = next((w for w in workspaces
+                              if w["workspace_id"] == pane["workspace_id"]), {})
+            branch = workspace.get("branch")
+            same_branch = same_family and previous_context.get("branch") == branch
+            if branch and not same_branch:
+                values["ihs_row_branch"] = ("" if values["ihs_repo"] else "\u2800\u2800") + "╰─ " + compact_branch_label(branch)
+            has_heading = bool(values["ihs_repo"] or values["ihs_row_branch"])
+            padding = (0 if has_heading else 2) + (2 if branch or linked else 0)
+            values["ihs_row_logo"] = "\u2800" * padding + logo
+            if linked and values["ihs_branch"] and not values["ihs_repo"]:
+                values["ihs_branch"] = "\u2800\u2800" + values["ihs_branch"]
+            priority_context = list(dict.fromkeys([context.get("repo"), context.get("branch"), tab_label]))
+            values["ihs_context"] = " · ".join(part for part in priority_context if part)
             status = pane.get("agent_status", "unknown")
             if status not in STATES:
                 status = "unknown"
             values[f"ihs_{status}"] = STATES[status] + " " + task_label(pane, tabs)
-            previous = pane["pane_id"]
+            values["ihs_status"] = {"working": "◔", "blocked": "●", "done": "●",
+                                    "idle": "○", "unknown": "○"}[status]
+            values["ihs_space_title"] = context.get("repo") or pane["workspace_id"]
+            values["ihs_row_tab"] = tab_label
+            if sort == "priority" and not priority_grouping:
+                # Priority moves whole agent blocks. Never borrow a heading
+                # from another agent: its position can change independently.
+                values["ihs_repo"] = context.get("repo") or pane["workspace_id"]
+                values["ihs_row_branch"] = "╰─ " + compact_branch_label(branch) if branch else None
+                values["ihs_row_logo"] = ("\u2800\u2800" if branch else "") + logo
         result[pane["pane_id"]] = values
     return result
 
@@ -178,11 +265,12 @@ def main():
         herdr = herdr_binary()
         snapshot = run_herdr(herdr, "api", "snapshot")["result"]["snapshot"]
         # agent.list distinguishes an unseen completion (done) from idle.
-        agents = {a["pane_id"]: a for a in snapshot["agents"]}
+        agents = {a["pane_id"]: {**a, "_agent_order": i}
+                  for i, a in enumerate(snapshot["agents"])}
         panes = [{**p, **agents.get(p["pane_id"], {})} for p in snapshot["panes"]]
-        workspaces = snapshot["workspaces"]
+        workspaces = with_checkout_branches(snapshot["workspaces"], panes)
         tabs = {t["tab_id"]: t["label"] for t in snapshot["tabs"]}
-        desired = desired_rows(panes, workspaces, tabs, icon_mode())
+        desired = desired_rows(panes, workspaces, tabs, icon_mode(), sort=client_sort())
         if args.clear:
             desired = {pane_id: dict.fromkeys(values) for pane_id, values in desired.items()}
         source = "plugin:" + os.environ.get("HERDR_PLUGIN_ID", PLUGIN_ID)

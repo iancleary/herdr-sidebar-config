@@ -59,7 +59,7 @@ and follow [manual removal](docs/setup.md#manual-removal).
 | `herdr-plugin.toml` | Plugin identity, supported platforms, lifecycle hooks, actions |
 | `sidebar.py` | Titles, grouping, tree prefixes, changed-token publishing |
 | `runtime.py` | CLI calls, binary discovery, font/text selection |
-| `sidebar-layout.toml` | Native Herdr rows and colors |
+| `sidebar-layout.toml`, `sidebar-layout-priority.toml` | Native Herdr rows and colors |
 | `setup_sidebar.py`, `configuration.py` | Installation, backups, removal, checks |
 | `tools/`, `assets/`, `font/`, `dist/` | Reproducible icon font and licensed source artwork |
 | `tests/` | Grouping, config preservation, runtime and font contracts |
@@ -74,12 +74,17 @@ and follow [manual removal](docs/setup.md#manual-removal).
   Preserve the optional user-owned `ihs_title` override and other plugins' tokens.
 - Keep refresh event-driven. No polling, animation timer, or `pane.updated` hook:
   metadata events can otherwise trigger repeated refreshes and UI repainting.
-- Keep one workspace heading, and one heading per tab containing agents. Hide
-  all tab headings/branches when the workspace has one actual tab. Shell-only
-  tabs count toward this rule but do not create empty agent headings.
-- Leave the workspace-to-tab connection plain; branches belong below tab names.
-- Retain the braille blank used for indentation. Herdr trims normal whitespace
-  from token values, and continuation rows have different native indentation.
+- Keep the default grouped layout as repo → branch/worktree → tab → agent where
+  snapshot facts support it. Use `workspace.worktree.repo_name` for repo
+  grouping and `workspace.branch`, workspace labels, or checkout names for
+  branch/worktree labels. Priority sort must keep context inline instead of
+  emitting grouping rows, because Herdr may render agents out of workspace
+  order.
+- In workspaces with multiple actual tabs, show the tab label inline on each
+  agent row. Hide tab labels/branches when the workspace has one actual tab.
+  Shell-only tabs count toward this rule but do not create empty agent headings.
+- Avoid invisible spacer glyphs such as U+2800; rely on visible branch prefixes
+  and native row layout instead.
 - Preserve unrelated user settings and never commit local configs, backups,
   session captures, credentials, or personal paths.
 - Keep upstream artwork licenses and attribution with any redistributed fonts.

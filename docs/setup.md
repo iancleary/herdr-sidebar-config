@@ -22,9 +22,10 @@ already-running server. `--ghostty-config`, `--font-dir`, and `--state-dir` acce
 explicit paths; repeat custom path flags for doctor and uninstall.
 
 The installer edits `[ui.sidebar.agents]` and its child tables, and sets
-`[ui].agent_panel_sort = "spaces"`. Other parsed settings must remain equal or
-setup refuses the edit. Ordinary tables and array tables are supported; unusual
-inline/dotted table forms may require manual installation. A matching existing
+`[ui].agent_panel_sort` to the selected grouped or priority variant. Other
+parsed settings must remain equal or setup refuses the edit. Ordinary tables and
+array tables are supported; unusual inline/dotted table forms may require
+manual installation. A matching existing
 layout is left alone.
 
 Backups contain original file bytes, including any private values already in
@@ -49,7 +50,7 @@ terminal font mapping alone does not install the plugin or its font.
 | --- | --- |
 | Checkout | Keep this repository at a stable path and run `uv sync` there. The plugin hook uses `.venv/bin/python` from this checkout. |
 | Plugin registration | From the checkout, run `herdr plugin link "$PWD" --disabled`. |
-| Herdr configuration | Merge `sidebar-layout.toml` into the manager's source for the active Herdr config. Set `agent_panel_sort = "spaces"` in its existing `[ui]` table. Apply the manager before reloading Herdr. |
+| Herdr configuration | Merge `sidebar-layout.toml` into the manager's source for the active Herdr config and set `agent_panel_sort = "spaces"` in its existing `[ui]` table. For priority ordering, merge `sidebar-layout-priority.toml` and set `agent_panel_sort = "priority"` instead. Apply the manager before reloading Herdr. |
 | Plugin setting | In the directory printed by `herdr plugin config-dir iancleary.herdr-sidebar`, create `config.toml` with either `icons = "font"` or `icons = "text"`. Manage this file too if the setup owns all persistent configuration. |
 | Icon font | In font mode, install `dist/HerdrSidebarLogos-Regular.ttf` in the platform font directory listed above. The configuration manager can own this copy. |
 | Terminal mapping | In font mode, add the `font-codepoint-map` line below to the terminal configuration source. Do not add a duplicate if an effective configuration already supplies it. |
@@ -78,7 +79,7 @@ sidebar. Split the installation by responsibility:
 | Location | Install or configure |
 | --- | --- |
 | Every machine that hosts agent panes | A stable plugin checkout, `uv sync`, the plugin link, the plugin `config.toml`, and plugin enablement. |
-| Every computer that displays a Herdr client | The Herdr sidebar layout and workspace sorting. In font mode, also install the font and configure the terminal mapping. |
+| Every computer that displays a Herdr client | The Herdr sidebar layout and matching agent panel sort. In font mode, also install the font and configure the terminal mapping. |
 
 A computer that both hosts panes and displays Herdr needs both sets. A remote
 agent host does not need the icon font merely to publish font-mode tokens. The
@@ -105,8 +106,10 @@ means its source of truth, followed by the manager's normal apply command.
 2. Run `herdr plugin link "$PWD" --disabled` from the repository root.
 3. Merge [sidebar-layout.toml](../sidebar-layout.toml) into your Herdr config,
    replacing existing `[ui.sidebar.agents]` tables. Set
-   `agent_panel_sort = "spaces"` in the existing `[ui]` table. Do not create a
-   duplicate `[ui]` table. Apply the configuration manager now, if present.
+   `agent_panel_sort = "spaces"` in the existing `[ui]` table. For priority
+   ordering, merge [sidebar-layout-priority.toml](../sidebar-layout-priority.toml)
+   and set `agent_panel_sort = "priority"` instead. Do not create a duplicate
+   `[ui]` table. Apply the configuration manager now, if present.
 4. Run `herdr plugin config-dir iancleary.herdr-sidebar`. In that directory's
    `config.toml`, set `icons = "text"` for portable labels, or `icons = "font"`
    after completing the font steps below.
@@ -158,7 +161,7 @@ keeps removal from deleting a user's checkout.
 | Icons appear too small or boxed | Confirm the family is **Herdr Sidebar Logos**, not the earlier Herdr Harness Logos font. The bundled Codex outline has no surrounding square. |
 | Rows are blank | Run doctor, check the plugin is enabled, and invoke refresh. The custom layout needs the plugin's metadata. |
 | A task label is stale | Focus the pane or invoke refresh. Titles update on lifecycle/focus events, not on each byte of terminal output. |
-| Tabs look flat | A workspace with one tab deliberately hides tab headings. Add a second tab to see the tree. |
+| Tabs look flat | A workspace with one tab deliberately hides tab context. Add a second tab to see the tree. |
 | Doctor reports a failed hook | Inspect `herdr plugin log list --plugin iancleary.herdr-sidebar --limit 5`. Confirm that `uv sync` created `.venv/bin/python`. |
 
 Doctor checks plugin registration, layout, sorting, the latest hook result, and
