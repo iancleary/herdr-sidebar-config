@@ -15,21 +15,27 @@ demonstration data in a separate session; the plugin and renderer are real.*
 
 ## Install
 
-Requires **Herdr 0.8.2 or later**, [uv](https://docs.astral.sh/uv/), and Git. uv
-provisions the required Python 3.12 runtime. Compatibility with Herdr 0.9.0 has
-been verified with its released macOS binary. The icon setup targets Ghostty on
-Linux or macOS. Linux/Ghostty has been tested live; macOS paths are provided but
-have not been tested in a live terminal.
+Requires **Herdr 0.8.2 or later**, [uv](https://docs.astral.sh/uv/),
+[Just](https://just.systems/), and Git. uv provisions the required Python 3.12
+runtime. Compatibility with Herdr 0.9.0 has been verified with its released
+macOS binary. The icon setup targets Ghostty on Linux or macOS. Linux/Ghostty
+has been tested live; macOS paths are provided but have not been tested in a
+live terminal.
 
 Run inside a Herdr terminal pane:
 
 ```sh
 git clone git@github.com:iancleary/herdr-sidebar-config.git ~/Code/herdr-sidebar-config
 cd ~/Code/herdr-sidebar-config
-uv sync
-.venv/bin/python setup_sidebar.py install
-.venv/bin/python setup_sidebar.py doctor
+just setup
+just install-preview
+just install
+just doctor
 ```
+
+The preview does not write files. Review its JSON output before you run
+`just install`. For another terminal, add `--text` to both install commands.
+For priority ordering, add `--sort priority` to both install commands.
 
 This automatic path requires writable Herdr and terminal configuration files.
 If a configuration manager owns either file, do not run the installer against
@@ -45,12 +51,12 @@ Open a **fresh Ghostty process** to load the newly installed font. Your Herdr
 session keeps running; attach to it from that process. A new tab in an existing
 Ghostty process may still use its old font cache.
 
-Want to inspect the changes first? Run `.venv/bin/python setup_sidebar.py install --dry-run`.
-For another terminal, run `.venv/bin/python setup_sidebar.py install --text` to use short
-provider labels such as `AI` and `C`, with no font or Ghostty changes.
+For another terminal, use `just install-preview --text`, then
+`just install --text`, to select short provider labels such as `AI` and `C`,
+with no font or Ghostty changes.
 Grouped ordering is the default. To keep Herdr's priority ordering while still
 showing repo, branch/worktree, and tab context inline, install with
-`.venv/bin/python setup_sidebar.py install --sort priority`.
+`just install-preview --sort priority`, then `just install --sort priority`.
 
 Setup links this checkout as a plugin, replaces the agent sidebar layout, sets
 the selected agent panel sort, and backs up modified files. It preserves other Herdr
@@ -101,8 +107,8 @@ use the [manual steps](docs/setup.md) when keeping later customizations.
 To restore the files saved during setup:
 
 ```sh
-.venv/bin/python setup_sidebar.py uninstall --dry-run
-.venv/bin/python setup_sidebar.py uninstall
+just uninstall-preview
+just uninstall
 ```
 
 Removal clears generated tokens, disables the plugin, and restores its backups.
